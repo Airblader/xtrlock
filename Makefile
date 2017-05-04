@@ -13,14 +13,14 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-LDLIBS=-lX11
+LDLIBS=-lX11 -lcrypt
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-Wall -DSHADOW_PWD
 INSTALL=install
 
 xtrlock:	xtrlock.o
 
-xtrlock.o:	xtrlock.c lock.bitmap mask.bitmap patchlevel.h
+xtrlock.o:	xtrlock.c patchlevel.h
 
 install:	xtrlock
 		$(INSTALL) -c -m 755 xtrlock /usr/bin/X11

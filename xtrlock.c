@@ -41,8 +41,6 @@
 #include <shadow.h>
 #endif
 
-#include "lock.bitmap"
-#include "mask.bitmap"
 #include "patchlevel.h"
 
 Display *display;
@@ -78,9 +76,6 @@ int main(int argc, char **argv){
   int clen, rlen=0;
   long goodwill= INITIALGOODWILL, timeout= 0;
   XSetWindowAttributes attrib;
-  Cursor cursor;
-  Pixmap csr_source,csr_mask;
-  XColor csr_fg, csr_bg, dummy, black;
   int ret, screen, blank = 0, fork_after = 0;
 #ifdef SHADOW_PWD
   struct spwd *sp;
@@ -142,7 +137,6 @@ int main(int argc, char **argv){
                           0,0,DisplayWidth(display, screen),DisplayHeight(display, screen),
                           0,DefaultDepth(display, screen), CopyFromParent, DefaultVisual(display, screen),
                           CWOverrideRedirect|CWBackPixel,&attrib); 
-    XAllocNamedColor(display, DefaultColormap(display, screen), "black", &black, &dummy);
   } else {
     window= XCreateWindow(display,DefaultRootWindow(display),
                           0,0,1,1,0,CopyFromParent,InputOnly,CopyFromParent,
@@ -150,34 +144,6 @@ int main(int argc, char **argv){
   }
                         
   XSelectInput(display,window,KeyPressMask|KeyReleaseMask);
-
-  csr_source= XCreateBitmapFromData(display,window,lock_bits,lock_width,lock_height);
-  csr_mask= XCreateBitmapFromData(display,window,mask_bits,mask_width,mask_height);
-
-  ret = XAllocNamedColor(display,
-                        DefaultColormap(display, DefaultScreen(display)),
-                        "steelblue3",
-                        &dummy, &csr_bg);
-  if (ret==0)
-    XAllocNamedColor(display,
-                    DefaultColormap(display, DefaultScreen(display)),
-                    "black",
-                    &dummy, &csr_bg);
-
-  ret = XAllocNamedColor(display,
-                        DefaultColormap(display,DefaultScreen(display)),
-                        "grey25",
-                        &dummy, &csr_fg);
-  if (ret==0)
-    XAllocNamedColor(display,
-                    DefaultColormap(display, DefaultScreen(display)),
-                    "white",
-                    &dummy, &csr_bg);
-
-
-
-  cursor= XCreatePixmapCursor(display,csr_source,csr_mask,&csr_fg,&csr_bg,
-                              lock_x_hot,lock_y_hot);
 
   XMapWindow(display,window);
 
@@ -209,7 +175,7 @@ int main(int argc, char **argv){
 
   if (XGrabPointer(display,window,False,(KeyPressMask|KeyReleaseMask)&0,
                GrabModeAsync,GrabModeAsync,None,
-               cursor,CurrentTime)!=GrabSuccess) {
+               None,CurrentTime)!=GrabSuccess) {
     XUngrabKeyboard(display,CurrentTime);
     fprintf(stderr,"xtrlock (version %s): cannot grab pointer\n",
 	    program_version);
